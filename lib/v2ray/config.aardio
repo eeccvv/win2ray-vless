@@ -20,10 +20,10 @@ setOutbound = function(outbound){
 		if(!outbound.tls) outbound.tls = "tls";
 			
 		var ob = {
-			mux={
+			mux = outbound.tls != "xtls" ?  {
 				concurrency=8;
 				enabled=true
-			};
+			} : null;
 			protocol="vless";
 			
 			settings={
@@ -34,7 +34,7 @@ setOutbound = function(outbound){
 						users={
 							{  
 								id=outbound.id;
-								flow=outbound.flow;
+								flow=outbound.flow : (outbound.tls == "xtls" ? "xtls-rprx-direct" : null);
 								encryption=( (!#outbound.security) || outbound.security=="auto") ? "none" : outbound.security;  
 								level=outbound.level : 0;
 							}
@@ -46,14 +46,14 @@ setOutbound = function(outbound){
 				network=outbound.network : "tcp";
 				security=#outbound.tls ? outbound.tls : null;
 				tlsSettings = (#outbound.tls && outbound.tls != "xtls") ? {
-					allowInsecure = outbound.tlsAllowInsecure;
-					serverName = outbound.tlsServerName : outbound.address;
+					allowInsecure = outbound.allowInsecure;
+					serverName = outbound.sni : outbound.address;
 					alpn = outbound.alpn;
 					disableSessionResumption = outbound.disableSessionResumption;
 				} : null;
 				xtlsSettings = outbound.tls == "xtls" ? {
-					allowInsecure = outbound.tlsAllowInsecure;
-					serverName = outbound.tlsServerName : outbound.address;
+					allowInsecure = outbound.allowInsecure;
+					serverName = outbound.sni : outbound.address;
 					alpn = outbound.alpn;
 					disableSessionResumption = outbound.disableSessionResumption;
 				} : null;
@@ -144,8 +144,8 @@ setOutbound = function(outbound){
 				network=outbound.network : "tcp";
 				security=#outbound.tls ? outbound.tls : null;
 				tlsSettings = #outbound.tls ? {
-					allowInsecure = outbound.tlsAllowInsecure;
-					serverName = outbound.tlsServerName;
+					allowInsecure = outbound.allowInsecure;
+					serverName = outbound.sni;
 				} : null
 			};
 			tag="proxy"
@@ -228,7 +228,7 @@ setOutbound = function(outbound){
 			streamSettings={
 				network = outbound.network : "tcp";
 				security = #outbound.tls ? outbound.tls : "tls"; 
-				serverName = outbound.tlsServerName : outbound.address;
+				serverName = outbound.sni : outbound.address;
 			};
 			tag="proxy"
 		};
@@ -316,7 +316,7 @@ exportToString = function(outbounds){
 			 
 			var info = {};
 			if(outbound.network!="tcp") info.type = outbound.network;
-			if(outbound.tlsServerName){ info.sni = outbound.tlsServerName;}
+			if(outbound.sni){ info.sni = outbound.sni;}
 			info.host = outbound.host;
 			info.path = outbound.path;
 			
@@ -335,10 +335,14 @@ exportToString = function(outbounds){
 			var info = {};
 			if(outbound.network!="tcp") info.network = outbound.network;
 			if(outbound.security!="none") info.security = outbound.security; 
-			if(outbound.tls!="tls") info.tls = outbound.tls;
-			if(outbound.tlsServerName){ info.sni = outbound.tlsServerName;}
+			if(outbound.tls) info.tls = outbound.tls;
+			if(outbound.flow) info.flow = outbound.flow;
+			if(outbound.allowInsecure) info.allowInsecure = outbound.allowInsecure;
+			if(outbound.alpn) info.alpn = outbound.alpn;
+			if(outbound.disableSessionResumption) info.disableSessionResumption = outbound.disableSessionResumption;
+			if(outbound.sni){ info.sni = outbound.sni;}
 			info.host = outbound.host;
-			info.path = outbound.path;
+			info.path = outbound.path;  
 			
 			if(..table.count(info)){
 				vless = ..inet.url.appendExtraInfo(vless,info) 
@@ -445,16 +449,22 @@ importFromString = function(str){
 					port = tonumber(vlessUrl.port) : 443; 
 					id = vlessUrl.user;
 					network = "tcp";
-					protocol = "vless"
+					protocol = "vless";
+					tls = "tls";
 				};
 				
 				if(vlessUrl.extraInfo){
 					var info = ..inet.url.splitParameters(vlessUrl.extraInfo);
-					outbound.tlsServerName = info.sni;
+					outbound.sni = info.sni;
 					outbound.host = info.host;
 					outbound.path = info.path;
 					outbound.network = info.network
 					outbound.security = info.security; 
+					if(info.tls) outbound.tls = info.tls;
+					if(info.flow) outbound.flow = info.flow;
+					if(info.allowInsecure) outbound.allowInsecure = info.allowInsecure;
+					if(info.disableSessionResumption) outbound.disableSessionResumption = info.disableSessionResumption;
+					if(info.alpn) outbound.alpn = info.alpn;	 
 				}
 				
 				if(vlessUrl.location){
@@ -515,7 +525,7 @@ importFromString = function(str){
 				
 				if(trojanUrl.extraInfo){
 					var info = ..inet.url.splitParameters(trojanUrl.extraInfo);
-					outbound.tlsServerName = info.sni || info.peer;
+					outbound.sni = info.sni || info.peer;
 					
 					outbound.host = info.host;
 					outbound.path = info.path;
@@ -555,7 +565,7 @@ importFromString = function(str){
 				
 				if(trojanUrl.extraInfo){
 					var info = ..inet.url.splitParameters(trojanUrl.extraInfo);
-					outbound.tlsServerName = info.sni || info.peer;
+					outbound.sni = info.sni || info.peer;
 					outbound.host = info.host;
 					outbound.path = info.path;
 					
@@ -603,7 +613,7 @@ importFromString = function(str){
 				}
 				
 				if(outbound.peer && #outbound.peer){
-					outbound.tlsServerName = outbound.peer;
+					outbound.sni = outbound.peer;
 					outbound.peer = null;
 					..table.define(outbound);
 				}

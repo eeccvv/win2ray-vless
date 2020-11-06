@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<project ver="10" name="win2ray" libEmbed="true" icon="\app.ico" ui="win" output="win2ray.exe" CompanyName="win2ray" FileDescription="v2ray,trojan,shadowsocks 通用客户端" LegalCopyright="Copyright (C) win2ray 2020" ProductName="win2ray" InternalName="win2ray" FileVersion="2.9.1.0" ProductVersion="2.9.1.0" publishDir="\" dstrip="false" local="false">
+<project ver="10" name="win2ray" libEmbed="true" icon="\app.ico" ui="win" output="win2ray.exe" CompanyName="win2ray" FileDescription="v2ray,trojan,shadowsocks 通用客户端" LegalCopyright="Copyright (C) win2ray 2020" ProductName="win2ray" InternalName="win2ray" FileVersion="3.0.0.0" ProductVersion="3.0.0.0" publishDir="\" dstrip="false" local="false">
 	<file name="main" path="main.aardio"/>
 	<folder name="窗体" path="forms" comment="" embed="true" local="false">
 		<folder name="main" path="forms\main" comment="forms\main">

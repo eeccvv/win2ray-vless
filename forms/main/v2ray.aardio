@@ -361,6 +361,20 @@ frmV2ray.listview.onnotify = function(id,code,ptr){
 				});
 				
 				popmenu.add();
+				
+				if(config.proxy.outbounds[currentIdx].port == 443 && config.proxy.outbounds[currentIdx].tls){
+					popmenu.add('使用浏览器打开伪装主页(HTTP)',function(id){
+						if(currentIdx){
+							process.openUrl("http://" + config.proxy.outbounds[currentIdx].address); 
+						}
+					});	
+					popmenu.add('使用浏览器打开伪装主页(HTTPS)',function(id){
+						if(currentIdx){
+							process.openUrl("https://" + config.proxy.outbounds[currentIdx].address); 
+						}
+					});	
+					popmenu.add();
+				}
 			}
 			
 			popmenu.add('删除服务器',function(id){

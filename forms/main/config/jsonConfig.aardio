@@ -101,7 +101,7 @@ winform.btnUpdate.oncommand = function(id,event){
 					}
 					
 					if(outbound.peer && #outbound.peer){
-						outbound.tlsServerName = outbound.peer;
+						outbound.sni = outbound.peer;
 						outbound.peer = null;
 						table.define(outbound);
 					}
@@ -455,7 +455,8 @@ var editOutboundsTip = {
 	protocol = {"协议";"可选值为 vmess,vless,shadowsocks,trojan,trojan-go 之一"}; 
 	port = {"端口";"服务器端口,数值"}; 
 	security = {"加密方式";"可省略,vmess协议默认为auto,vless协议默认为none"};
-	tlsServerName = {"TLS服务器名";"TLS客户端请求中的服务器名字段"}; 
+	sni = {"TLS服务器名";"TLS客户端请求中的服务器名字段"}; 
+	flow = {"流控";"目前仅用于选择 XTLS 的算法,省略时默认值为xtls-rprx-direct"}; 
 }
 
 winform.editOutbounds.wndproc = function(hwnd,message,wParam,lParam){
